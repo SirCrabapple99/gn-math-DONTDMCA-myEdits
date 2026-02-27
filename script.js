@@ -662,6 +662,8 @@ settings.addEventListener('click', () => {
     <button class="settings-button" onclick="darkMode()">Toggle Dark Mode</button>
     <br><br>
     <button class="settings-button" onclick="tabCloak()">Tab Cloak</button>
+    <br><br>
+    <button class="settings-button" onclick="erudaToggle()">Toggle Console</button>
     <br>
     `;
     popupBody.contentEditable = false;
@@ -997,3 +999,4 @@ function startupFavorites() {
     }
     sendFavoriteZones()
 }
+
