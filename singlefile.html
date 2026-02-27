@@ -602,6 +602,7 @@ footer {
 
     .footer-links {
         gap: 1.5rem;
+        position: fixed;
     }
 }
 
@@ -824,14 +825,13 @@ footer {
         </div>
     </div>
 
-    <div class="footer-links">
+    <footer class="footer-links">
             <a href="#" onclick="loadDMCA(); return false;">DMCA</a>
             <a href="#" onclick="showContact(); return false;">Contact</a>
             <a href="#" onclick="loadPrivacy(); return false;">Privacy Policy</a>
             <a href="javascript:saveData()">Export Data</a>
             <a href="#" onclick="document.getElementById('importData').click(); return false;">Import Data</a>
             <input type="file" id="importData" style="display: none;" onchange="loadData(event)">
-        </div>
     </footer>
 
     <script>
@@ -851,6 +851,11 @@ const zonesurls = [
 let zonesURL = zonesurls[Math.floor(Math.random() * zonesurls.length)];
 const coverURL = "https://cdn.jsdelivr.net/gh/%67%6e%2d%6d%61%74%68/covers@main";
 const htmlURL = "https://cdn.jsdelivr.net/gh/%67%6e%2d%6d%61%74%68/html@main";
+
+let crabZonesURL = "https://cdn.jsdelivr.net/gh/SirCrabapple99/crab-assets@main/zones.json";
+const crabCoverURL = "https://cdn.jsdelivr.net/gh/SirCrabapple99/crab-assets@main/covers";
+const crabHtmlURL = "https://cdn.jsdelivr.net/gh/SirCrabapple99/crab-assets@main/html";
+
 let zones = [];
 let popularityData = {};
 const featuredContainer = document.getElementById('featuredZones');
@@ -862,12 +867,20 @@ function toTitleCase(str) {
 }
 async function listZones() {
     try {
-      let sharesponse;
-      let shajson;
-      let sha;
+
+    // sha
+    let sharesponse;
+    let shajson;
+    let sha;
+    let crabsharesponse;
+    let crabshajson;
+    let crabsha;
         try {
           sharesponse = await fetch("https://api.github.com/repos/%67%6e%2d%6d%61%74%68/assets/commits?t="+Date.now());
+          crabsharesponse = await fetch("https://api.github.com/repos/SirCrabapple99/crab-assets/commits?t="+Date.now());
+          console.log(crabsharesponse)
         } catch (error) {}
+
         if (sharesponse && sharesponse.status === 200) {
           try {
             shajson = await sharesponse.json();
@@ -875,21 +888,25 @@ async function listZones() {
             if (sha) {
                 zonesURL = `https://cdn.jsdelivr.net/gh/%67%6e%2d%6d%61%74%68/assets@${sha}/zones.json`;
             }
-          } catch (error) {
-            try {
-                let secondarysharesponse = await fetch("https://raw.githubusercontent.com/%67%6e%2d%6d%61%74%68/xml/refs/heads/main/sha.txt?t="+Date.now());
-                if (secondarysharesponse && secondarysharesponse.status === 200) {
-                    sha = (await secondarysharesponse.text()).trim();
-                    if (sha) {
-                        zonesURL = `https://cdn.jsdelivr.net/gh/%67%6e%2d%6d%61%74%68/assets@${sha}/zones.json`;
-                    }
-                }
-            } catch(error) {}
-          }
+          } catch (error) {}
         }
+
+        if (crabsharesponse && crabsharesponse.status === 200) {
+          try {
+            crabshajson = await crabsharesponse.json();
+            crabsha = crabshajson[0]['sha'];
+            if (crabsha) {
+                crabZonesURL= `https://cdn.jsdelivr.net/gh/SirCrabapple99/crab-assets@${crabsha}/zones.json`;
+            }
+          } catch (error) {}
+        }
+
+        // gn games
         const response = await fetch(zonesURL+"?t="+Date.now());
         const json = await response.json();
-        zones = json;
+        const crabresponse = await fetch(crabZonesURL+"?t="+Date.now());
+        const crabjson = await crabresponse.json();
+        zones = [...json,...crabjson];
         zones[0].featured = true; // always gonna be the discord
         await Promise.all([fetchPopularity("year"), fetchPopularity("month"), fetchPopularity("week"), fetchPopularity("day")]);
         sortZones();
@@ -904,7 +921,8 @@ async function listZones() {
                     if (zone.url.startsWith("http")) {
                         window.open(zone.url, "_blank");
                     } else {
-                        const url = zone.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+                        
+                        const url = zone.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
                         fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
                             document.documentElement.innerHTML = html;
                             const popup = document.createElement("div");
@@ -970,11 +988,12 @@ async function listZones() {
             opt.textContent = toTitleCase(tag);
             filteroption.appendChild(opt);
         }
+       
     } catch (error) {
         console.error(error);
-        container.innerHTML = `Error loading zones: ${error}`;
     }
 }
+
 async function fetchPopularity(duration) {
     try {
         if (!popularityData[duration]) {
@@ -1046,7 +1065,7 @@ function displayFeaturedZones(featuredZones) {
         zoneItem.appendChild(favoriteButton);
 
         const img = document.createElement("img");
-        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
         img.alt = file.name;
         img.loading = "lazy";
         img.className = "lazy-zone-img";
@@ -1109,7 +1128,7 @@ function displayZones(zones) {
 
         zoneItem.onclick = () => openZone(file);
         const img = document.createElement("img");
-        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
         img.alt = file.name;
         img.loading = "lazy";
         img.className = "lazy-zone-img";
@@ -1178,7 +1197,7 @@ function openZone(file) {
     if (file.url.startsWith("http")) {
         window.open(file.url, "_blank");
     } else {
-        const url = file.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        const url = file.url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
         fetch(url+"?t="+Date.now()).then(response => response.text()).then(html => {
             if (zoneFrame.contentDocument === null) {
                 zoneFrame = document.createElement("iframe");
@@ -1207,7 +1226,7 @@ function openZone(file) {
 
 function aboutBlank() {
     const newWindow = window.open("about:blank", "_blank");
-    let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent).url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+    let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent).url.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
     fetch(zone+"?t="+Date.now()).then(response => response.text()).then(html => {
         if (newWindow) {
             newWindow.document.open();
@@ -1569,9 +1588,12 @@ function loadDMCA() {
     const popupBody = document.getElementById('popupBody');
     popupBody.innerHTML = `
         <div class="dmca-content">
+            <p><strong>If your game is blue</strong>, it means that it is from a fork of <strong>gn-math</strong> 
+                by SirCrabapple99. Make an issue <a href="https://github.com/SirCrabapple99/crab-assets/issues/new/choose">here</a> and i'll remove it.
+            </p>
             <p>
                 If you own or developed a game that is on <strong>gn-math</strong> 
-                and would like it removed, please do one of the following:
+                and is <strong>not blue</strong> and would like it removed, please do one of the following:
             </p>
             <ol>
                 <li>
@@ -1802,7 +1824,7 @@ function sendFavoriteZones() {
 
         zoneItem.onclick = () => openZone(file);
         const img = document.createElement("img");
-        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
+        img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL).replace("{CRAB_COVER_URL}", crabCoverURL).replace("{CRAB_HTML_URL}", crabHtmlURL);
         img.alt = file.name;
         img.loading = "lazy";
         img.className = "lazy-zone-img";
