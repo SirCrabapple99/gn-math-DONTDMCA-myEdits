@@ -1042,8 +1042,8 @@ function displayFeaturedZones(featuredZones) {
         if (zoneFavorites.some(fav => fav && fav.name === file.name)) {
             favoriteButton.className = 'favorite-button starred'
         }
-        zoneItem.appendChild(favoriteButton);
         favoriteButton.setAttribute('data-zone-name', file.name);
+        zoneItem.appendChild(favoriteButton);
 
         const img = document.createElement("img");
         img.dataset.src = file.cover.replace("{COVER_URL}", coverURL).replace("{HTML_URL}", htmlURL);
@@ -1105,6 +1105,7 @@ function displayZones(zones) {
             favoriteButton.className = 'favorite-button starred'
         }
         zoneItem.appendChild(favoriteButton);
+        favoriteButton.setAttribute('data-zone-name', file.name);
 
         zoneItem.onclick = () => openZone(file);
         const img = document.createElement("img");
