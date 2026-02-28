@@ -878,7 +878,7 @@ async function listZones() {
         try {
           sharesponse = await fetch("https://api.github.com/repos/%67%6e%2d%6d%61%74%68/assets/commits?t="+Date.now());
           crabsharesponse = await fetch("https://api.github.com/repos/SirCrabapple99/crab-assets/commits?t="+Date.now());
-          console.log(crabsharesponse)
+       // console.log(crabsharesponse)
         } catch (error) {}
 
         if (sharesponse && sharesponse.status === 200) {
@@ -892,13 +892,17 @@ async function listZones() {
         }
 
         if (crabsharesponse && crabsharesponse.status === 200) {
+       // console.log('crabshaerror')
           try {
             crabshajson = await crabsharesponse.json();
             crabsha = crabshajson[0]['sha'];
             if (crabsha) {
                 crabZonesURL= `https://cdn.jsdelivr.net/gh/SirCrabapple99/crab-assets@${crabsha}/zones.json`;
+            //  console.log(crabZonesURL)
             }
-          } catch (error) {}
+          } catch (error) {
+        //  console.log('crabshacooked')
+          }
         }
 
         // gn games
@@ -1249,7 +1253,7 @@ function closeZone() {
 
 function downloadZone() {
     let zone = zones.find(zone => zone.id + '' === document.getElementById('zoneId').textContent);
-    fetch(zone.url.replace("{HTML_URL}", htmlURL)+"?t="+Date.now()).then(res => res.text()).then(text => {
+    fetch(zone.url.replace("{HTML_URL}", htmlURL).replace("{CRAB_HTML_URL}", crabHtmlURL)+"?t="+Date.now()).then(res => res.text()).then(text => {
         const blob = new Blob([text], {
             type: "text/plain;charset=utf-8"
         });
@@ -1807,6 +1811,7 @@ function toggleFavorite(e = 'none', file) {
 }
 
 function sendFavoriteZones() {
+ // console.log(zoneFavorites)
     favoriteZones.innerHTML = "";
     zoneFavorites.forEach((file, index) => {
         const zoneItem = document.createElement("div");
